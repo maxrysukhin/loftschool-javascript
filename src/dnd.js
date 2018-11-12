@@ -27,6 +27,29 @@ const homeworkContainer = document.querySelector('#homework-container');
    homeworkContainer.appendChild(newDiv);
  */
 function createDiv() {
+    let el = document.createElement('div');
+    let width;
+
+    do {
+        width = Math.floor(Math.random() * Math.floor(300));
+    } while (width < 150);
+
+    let red = Math.floor(Math.random() * Math.floor(255));
+    let green = Math.floor(Math.random() * Math.floor(255));
+    let blue = Math.floor(Math.random() * Math.floor(255));
+    
+    let yPos = Math.floor(Math.random() * (Math.floor(screen.height - width)));
+    let xPos = Math.floor(Math.random() * (Math.floor(screen.width - width)));
+    
+    el.className = 'draggable-div';
+    el.style.width = width + 'px';
+    el.style.height = width + 'px';
+    el.style.background = 'rgb(' + red + ',' + green + ',' + blue + ')';
+    el.style.top = yPos + 'px';
+    el.style.left = xPos + 'px';
+    el.style.position = 'fixed';
+
+    return el;
 }
 
 /*
@@ -38,6 +61,34 @@ function createDiv() {
    addListeners(newDiv);
  */
 function addListeners(target) {
+    let active = false;
+    let startX,
+        startY,
+        originX,
+        originY;
+
+    target.addEventListener('mousedown', (e) => {
+        let rect = target.getBoundingClientRect();
+        
+        target.style.zIndex = 5;
+
+        startX = e.clientX;
+        startY = e.clientY;
+        originX = rect.left;
+        originY = rect.top;
+        active = true;
+    });
+    target.addEventListener('mousemove', (e) => {
+        if (active) {
+
+            target.style.left = originX + (e.clientX - startX) + 'px';
+            target.style.top = originY + (e.clientY - startY) + 'px';
+        }
+    });
+    target.addEventListener('mouseup', () => {
+        target.style.zIndex = 0;
+        active = false;
+    });
 }
 
 let addDivButton = homeworkContainer.querySelector('#addDiv');
