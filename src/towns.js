@@ -37,6 +37,41 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+    return new Promise((resolve) => {
+        let towns = [];
+        let xhr = new XMLHttpRequest();
+
+        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json', true);
+        xhr.responseType = 'json';
+        xhr.send();
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let townsResponse = xhr.response;
+
+                for (let town of townsResponse) {
+                    towns.push(town);
+                }
+
+                towns.sort((a, b) => {
+                    const aName = a.name.toUpperCase();
+                    const bName = b.name.toUpperCase();
+
+                    if (aName < bName) {
+                        return -1;
+                    }
+                    if (aName > bName) {
+                        return 1;
+                    }
+                });
+
+                loadingBlock.style.display = 'none';
+                filterBlock.style.display = 'block';
+                sessionStorage.setItem('towns', JSON.stringify(towns));
+                resolve(towns);
+            }
+        }
+    });
 }
 
 /*
@@ -51,6 +86,9 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+    let pattern = new RegExp(chunk, 'i');
+
+    return pattern.test(full);
 }
 
 /* Блок с надписью "Загрузка" */
@@ -62,8 +100,22 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-filterInput.addEventListener('keyup', function() {
+filterInput.addEventListener('keyup', function () {
     // это обработчик нажатия кливиш в текстовом поле
+    filterResult.innerHTML = '';
+
+    if (filterInput.value) {
+        const towns = JSON.parse(sessionStorage.getItem('towns'));
+
+        for (const town of towns) {
+            if (isMatching(town.name, filterInput.value)) {
+                let element = document.createElement('p');
+
+                element.innerHTML = town.name;
+                filterResult.appendChild(element);
+            }
+        }
+    }
 });
 
 export {
