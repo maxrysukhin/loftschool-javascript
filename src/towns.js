@@ -1,3 +1,4 @@
+import { loadAndSortTowns } from './index.js';
 /*
  Страница должна предварительно загрузить список городов из
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
@@ -37,41 +38,7 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
-    return new Promise((resolve) => {
-        let towns = [];
-        let xhr = new XMLHttpRequest();
-
-        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json', true);
-        xhr.responseType = 'json';
-        xhr.send();
-
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                let townsResponse = xhr.response;
-
-                for (let town of townsResponse) {
-                    towns.push(town);
-                }
-
-                towns.sort((a, b) => {
-                    const aName = a.name.toUpperCase();
-                    const bName = b.name.toUpperCase();
-
-                    if (aName < bName) {
-                        return -1;
-                    }
-                    if (aName > bName) {
-                        return 1;
-                    }
-                });
-
-                loadingBlock.style.display = 'none';
-                filterBlock.style.display = 'block';
-                sessionStorage.setItem('towns', JSON.stringify(towns));
-                resolve(towns);
-            }
-        }
-    });
+    return loadAndSortTowns();
 }
 
 /*
@@ -117,6 +84,14 @@ filterInput.addEventListener('keyup', function () {
         }
     }
 });
+
+let promise = loadTowns();
+
+promise.then( towns => {
+    loadingBlock.style.display = 'none';
+    filterBlock.style.display = 'block';
+    sessionStorage.setItem('towns', JSON.stringify(towns));
+})
 
 export {
     loadTowns,
